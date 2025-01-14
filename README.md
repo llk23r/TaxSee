@@ -2,8 +2,8 @@
 
 TLDR: 🚀
 Implementations:
-- 🔨 Simple: A simple GraphRAG in 1000 lines (AND A RAG ENGINE to build future RAG applications ~ WIP), one file at app.py and it uses Neo4j and FAISS. (Used Milvus initially but switched)
-- 🏗️ Complex: A Config driven RAG engine that allows building pipelines for RAG in a plug and play manner (It has all the tests for the raw APIs and interfaces)
+- 🔨 Simple: A simple GraphRAG in 1000 lines (AND A RAG ENGINE to build future RAG applications ~ WIP), one file at [main.py](main.py) and it uses Neo4j and FAISS. (Used Milvus initially but switched)
+- 🏗️ Complex: A Config driven RAG engine that allows building pipelines for RAG in a plug and play manner (It has all the tests for the raw APIs and interfaces) - See [rag_engine/](rag_engine/)
 Resources:
 - 📚 [resources.md](resources.md) - Many things I read and referred to in learning 
 
