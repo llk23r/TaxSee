@@ -1,0 +1,15 @@
+streamlit==1.32.0
+pdfplumber==0.10.4
+pandas==2.2.1
+python-pptx==0.6.23
+pymilvus==2.3.6
+neo4j==5.17.0
+sentence-transformers==2.5.1
+python-dotenv==1.0.1
+nltk==3.8.1
+unstructured==0.12.5
+pypdf==4.0.1
+psutil==5.9.8
+openai==1.12.0 
+langchain==0.1.4
+langchain-text-splitters==0.0.1
