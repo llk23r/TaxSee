@@ -23,7 +23,9 @@ class CerebrasEnhancer(ChunkEnhancer):
 
         self.client = Cerebras(api_key=api_key)
 
-    async def enhance_batch(self, chunks: List[Chunk], task_name: str = "default") -> List[Chunk]:
+    async def enhance_batch(
+        self, chunks: List[Chunk], task_name: str = "default"
+    ) -> List[Chunk]:
         """Enhance a batch of chunks using Cerebras API."""
         if not chunks:
             return []
@@ -41,17 +43,12 @@ class CerebrasEnhancer(ChunkEnhancer):
         try:
             # Get response from Cerebras using the model
             stream = self.client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": prompt
-                    }
-                ],
+                messages=[{"role": "system", "content": prompt}],
                 model=model_name,
                 stream=True,
                 max_completion_tokens=self.config.batch_size,  # Assuming batch_size is used for tokens
                 temperature=0.7,  # Default temperature
-                top_p=0.9  # Default top_p
+                top_p=0.9,  # Default top_p
             )
 
             # Collect response
@@ -146,4 +143,4 @@ class CerebrasEnhancer(ChunkEnhancer):
 
 
 # Register implementation
-ComponentRegistry.register_enhancer("cerebras", CerebrasEnhancer) 
+ComponentRegistry.register_enhancer("cerebras", CerebrasEnhancer)

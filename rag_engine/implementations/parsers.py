@@ -48,7 +48,7 @@ class PDFParser(DocumentParser):
 
             for i, page in enumerate(pdf_reader.pages):
                 text = page.extract_text()
-                print(f"PDFParser: Extracted {len(text)} chars from page {i+1}")
+                print(f"PDFParser: Extracted {len(text)} chars from page {i + 1}")
                 text_content.append(text)
 
         doc = Document(

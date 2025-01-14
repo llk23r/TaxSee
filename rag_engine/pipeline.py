@@ -52,7 +52,9 @@ class DefaultRAGPipeline(RAGPipeline):
         result = await self.neo4j_executor.run_query(query)
         return result
 
-    async def create_neo4j_node(self, node_name: str, node_type: str, properties: dict) -> None:
+    async def create_neo4j_node(
+        self, node_name: str, node_type: str, properties: dict
+    ) -> None:
         """Create a node in Neo4j."""
         create_query = f"CREATE ({node_name}:{node_type} {{ {', '.join(f'{k}: {repr(v)}' for k, v in properties.items())} }})"
         await self.neo4j_executor.run_query(create_query)
@@ -86,7 +88,7 @@ class DefaultRAGPipeline(RAGPipeline):
 
             for i in range(0, len(chunks), batch_size):
                 batch = chunks[i : i + batch_size]
-                print(f"Pipeline: Processing batch {i//batch_size + 1}")
+                print(f"Pipeline: Processing batch {i // batch_size + 1}")
 
                 # Enhance chunks with LLM to add additional context/metadata
                 print("Pipeline: Enhancing chunks")
@@ -115,9 +117,7 @@ class DefaultRAGPipeline(RAGPipeline):
                     if "entities" in echunk.metadata:
                         for node in echunk.metadata["entities"]:
                             await self.create_neo4j_node(
-                                node["entity"], 
-                                node["type"], 
-                                node["properties"]
+                                node["entity"], node["type"], node["properties"]
                             )
 
                 # Store chunks in vector database
@@ -137,6 +137,7 @@ class DefaultRAGPipeline(RAGPipeline):
             print(f"Pipeline Error: {str(e)}")
             print(f"Pipeline Error Type: {type(e)}")
             import traceback
+
             print(f"Pipeline Traceback: {traceback.format_exc()}")
             raise
 

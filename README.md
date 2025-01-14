@@ -1,6 +1,13 @@
-# GraphRAG in 1000 lines (AND A RAG ENGINE to build future RAG applications ~ WIP)
+# 👀 TaxSEE! (YSWIDT?) 
 
-This implementation demonstrates a cutting-edge approach to Retrieval-Augmented Generation (RAG) combining multiple SOTA techniques for maximum accuracy and performance.
+TLDR: 🚀
+Implementations:
+- 🔨 Simple: A simple GraphRAG in 1000 lines (AND A RAG ENGINE to build future RAG applications ~ WIP), one file at app.py and it uses Neo4j and FAISS. (Used Milvus initially but switched)
+- 🏗️ Complex: A Config driven RAG engine that allows building pipelines for RAG in a plug and play manner (It has all the tests for the raw APIs and interfaces)
+Resources:
+- 📚 [resources.md](resources.md) - Many things I read and referred to in learning 
+
+✨ This implementation demonstrates a cutting-edge approach to Retrieval-Augmented Generation (RAG) combining multiple SOTA techniques for maximum accuracy and performance - It kinda works! 🎉
 
 ### 🎯 Key Features
 
@@ -106,22 +113,118 @@ PDF parsing is surprisingly hard! Tested multiple libraries, ended up with a pra
 - Experimented with Ollama + Llama 3.2 vision for metadata extraction
 - Tried Gemini 1.5 Pro for chunk reorganization (interesting but slow)
 
-## RAG ENGINE
-
+## RAG ENGINE - A WIP standalone engine for building pluggable and playable RAGs based on config (rag_engine/run_pipeline.py)
 ### The Gemini Experiment
 An experimental approach for high accuracy:
 1. Load batch of chunks into memory
 2. Send to Gemini 1.5 Pro
-3. Ask Gemini to reorganize for coherence
-4. Generate Cypher queries for precise graph relationships
+3. Ask Gemini to reorganize for coherence and add metadata and relationships and cypher queries
+4. Execute those cypher queries on Neo4j, in time and accurate knowledge graph building pipeline
+Inspired by Late Chunking and Anthropic's Contextual Embedding concept
+
 
 ## Current Limitations
 - Large files are still challenging (working on it!)
 - Requires OpenAI API key (local LLM support planned)
 - Could use better CSV handling (SQL approach in progress)
-
-## Future Ideas
-### CSV Processing Enhancement
+- Needs Multimodal support for things like PPT and PDF parsing and there are 100s of solutions out there and yet they not good
 
 
+## Designing solution for large scale RAGs
+```mermaid
+sequenceDiagram
+    autonumber
+    participant User
+    participant Frontend
+    participant Orchestrator
+    participant EventBus
+    participant IndexingService
+    participant RetrievalService
+    participant CrossEncoder
+    participant LLMService
+    participant VectorDB
+    participant GraphDB
+    participant DocStore
+    participant SafetyGuard
+    participant Evaluator
 
+    alt User Asks a Question
+        User->>Frontend: Type Question
+        Frontend->>Orchestrator: Submit Question
+        Orchestrator->>SafetyGuard: Validate Question
+        SafetyGuard-->>Orchestrator: Question Validated
+        
+        par Hybrid Retrieval
+            Orchestrator->>RetrievalService: Request Semantic Search
+            RetrievalService->>VectorDB: Dense Retrieval
+            RetrievalService->>GraphDB: Knowledge Graph Query
+            RetrievalService->>DocStore: Fetch Source Documents
+            RetrievalService->>CrossEncoder: Rerank Results
+            Note right of CrossEncoder: Cross-encoder scores relevance<br/>between query and each passage
+            CrossEncoder-->>RetrievalService: Return Reranked Results
+            RetrievalService-->>Orchestrator: Return Multi-Modal Context
+        end
+
+        Orchestrator->>LLMService: Generate Answer (with Context)
+        LLMService->>LLMService: Apply Chain of Thought
+        LLMService-->>Orchestrator: Return Answer + Reasoning
+        
+        Orchestrator->>Evaluator: Validate Answer Quality
+        Evaluator-->>Orchestrator: Quality Metrics
+        
+        Orchestrator-->>Frontend: Return Answer + Sources
+        Frontend-->>User: Display Answer with Citations
+
+    else Document Change Event (Create/Update/Delete)
+        User->>Frontend: Modify Document
+        Frontend->>Orchestrator: Submit Document Change
+        Orchestrator->>SafetyGuard: Validate Document
+        SafetyGuard-->>Orchestrator: Document Validated
+        Orchestrator->>EventBus: Publish "DocumentChanged" Event
+
+        Note right of Orchestrator: Document Change Pipeline
+
+        EventBus->>IndexingService: "DocumentChanged" Event
+        
+        alt Document Created/Updated
+            IndexingService->>IndexingService: Extract & Clean Text
+            IndexingService->>IndexingService: Chunk with Overlap
+            IndexingService->>IndexingService: Generate Embeddings
+            IndexingService->>IndexingService: Extract Knowledge Graph
+            
+            par Update Knowledge Bases
+                IndexingService->>VectorDB: Upsert Embeddings
+                IndexingService->>GraphDB: Update Knowledge Graph
+                IndexingService->>DocStore: Update Document Content
+            end
+        else Document Deleted
+            par Remove from Knowledge Bases
+                IndexingService->>VectorDB: Delete Embeddings
+                IndexingService->>GraphDB: Remove Graph Nodes/Edges
+                IndexingService->>DocStore: Delete Document
+            end
+        end
+
+        IndexingService-->>EventBus: "IndexingComplete" Event
+        EventBus->>Orchestrator: Notify Change Processed
+        
+        EventBus->>Evaluator: "UpdateMetrics" Event
+        Evaluator->>Evaluator: Update System Performance
+    end
+
+    loop Continuous Learning & Optimization
+        EventBus->>IndexingService: "NewDataAvailable" Event
+        IndexingService->>IndexingService: Process & Enrich Data
+        
+        par Update Knowledge Bases
+            IndexingService->>VectorDB: Update Embeddings
+            IndexingService->>GraphDB: Update Knowledge Graph
+            IndexingService->>DocStore: Update Documents
+        end
+        
+        EventBus->>Evaluator: "UpdateMetrics" Event
+        Evaluator->>Evaluator: Update System Performance
+    end
+```
+
+Things I read and referred to in learning are shared in [resources.md](resources.md) - Many thanks to those who shared their learnings!

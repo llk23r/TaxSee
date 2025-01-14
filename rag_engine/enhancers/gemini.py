@@ -19,14 +19,14 @@ logger = logging.getLogger(__name__)
 class GeminiEnhancer(ChunkEnhancer):
     def __init__(self, config: EnhancementConfig):
         self.config = config
-        
+
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set")
-        
+
         if not self.config.model:
             raise ValueError("Model name not specified in configuration")
-        
+
         genai.configure(api_key=api_key)
         self._setup_model()
         self._token_counter = TokenCounter(config.model)
@@ -37,7 +37,7 @@ class GeminiEnhancer(ChunkEnhancer):
             max_output_tokens=8192,
             response_mime_type="application/json",
         )
-        
+
         if self.config.prompt_template:
             self.model = GenerativeModel(
                 self.config.model,
@@ -58,8 +58,7 @@ class GeminiEnhancer(ChunkEnhancer):
 
         try:
             token_info = self._token_counter.count_tokens(
-                combined_text,
-                system_prompt=self.config.prompt_template
+                combined_text, system_prompt=self.config.prompt_template
             )
             logger.info(f"Token usage for batch: {token_info}")
 
@@ -77,48 +76,56 @@ class GeminiEnhancer(ChunkEnhancer):
 
             try:
                 result = json.loads(response.text)
-                
+
                 for chunk in chunks:
                     enhanced_text = result.get("enhanced_text")
                     if enhanced_text:
                         chunk.text = enhanced_text
 
                     metadata = result.get("metadata", {})
-                    metadata.update({
-                        "entities": result.get("entities", []),
-                        "relationships": result.get("relationships", []),
-                        "cypher_query": result.get("cypher_query"),
-                    })
+                    metadata.update(
+                        {
+                            "entities": result.get("entities", []),
+                            "relationships": result.get("relationships", []),
+                            "cypher_query": result.get("cypher_query"),
+                        }
+                    )
                     chunk.metadata.update(metadata)
 
             except json.JSONDecodeError as e:
                 logger.warning(f"Failed to parse JSON response: {e}")
                 for chunk in chunks:
-                    chunk.metadata.update({
-                        "entities": [],
-                        "relationships": [],
-                        "cypher_query": None,
-                        "error": "JSON parsing failed",
-                    })
+                    chunk.metadata.update(
+                        {
+                            "entities": [],
+                            "relationships": [],
+                            "cypher_query": None,
+                            "error": "JSON parsing failed",
+                        }
+                    )
 
         except ValueError as ve:
             logger.error(f"Token limit exceeded: {ve}")
             for chunk in chunks:
-                chunk.metadata.update({
-                    "entities": [],
-                    "relationships": [],
-                    "cypher_query": None,
-                    "error": str(ve),
-                })
+                chunk.metadata.update(
+                    {
+                        "entities": [],
+                        "relationships": [],
+                        "cypher_query": None,
+                        "error": str(ve),
+                    }
+                )
         except Exception as e:
             logger.error(f"Error enhancing chunks: {e}")
             for chunk in chunks:
-                chunk.metadata.update({
-                    "entities": [],
-                    "relationships": [],
-                    "cypher_query": None,
-                    "error": str(e),
-                })
+                chunk.metadata.update(
+                    {
+                        "entities": [],
+                        "relationships": [],
+                        "cypher_query": None,
+                        "error": str(e),
+                    }
+                )
 
         return chunks
 

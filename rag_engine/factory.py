@@ -182,7 +182,7 @@ class RAGFactory:
 def load_implementations():
     """Load all available implementations from the implementations directory."""
     base_dir = Path(__file__).parent
-    
+
     # Load from implementations directory
     implementations_dir = base_dir / "implementations"
     for module_path in implementations_dir.glob("*.py"):
@@ -190,7 +190,7 @@ def load_implementations():
             continue
         module_name = f"rag_engine.implementations.{module_path.stem}"
         importlib.import_module(module_name)
-        
+
     # Load from enhancers directory
     enhancers_dir = base_dir / "enhancers"
     for module_path in enhancers_dir.glob("*.py"):
