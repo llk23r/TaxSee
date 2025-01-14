@@ -21,20 +21,15 @@ from dotenv import load_dotenv
 
 from sentence_transformers import SentenceTransformer, CrossEncoder
 
-# -------- FAISS IMPORT --------
+
 import faiss
 import numpy as np
 
-# Neo4j
 from neo4j import GraphDatabase
 
-# You mentioned a 'fast_processor' custom class, we keep that
 from fast_processor import FastDocumentProcessor
 
-# -------------------------------
-#       CONFIG & INIT
-# -------------------------------
-load_dotenv()  # load environment variables from .env if present
+load_dotenv()
 
 HF_EMBED_MODEL = os.getenv("HF_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 CROSS_ENCODER_MODEL = os.getenv(
@@ -45,23 +40,19 @@ NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "taxrag_dev_password")
 
-# Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-os.environ["TOKENIZERS_PARALLELISM"] = "false"  # Prevent tokenizer warnings
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-# Add a logging lock
 log_lock = Lock()
 
 
 def log_status(message: str, level: str = "info"):
-    """Log status message to both console and Streamlit sidebar with thread safety."""
     with log_lock:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         log_msg = f"{timestamp} - {message}"
-        print(log_msg)  # Console log
+        print(log_msg)
 
-        # Only try to update Streamlit if we're in the main thread
         try:
             if level == "error":
                 st.sidebar.error(f"❌ {message}")
@@ -72,12 +63,9 @@ def log_status(message: str, level: str = "info"):
             else:
                 st.sidebar.info(f"ℹ️ {message}")
         except:
-            pass  # Ignore Streamlit errors in worker processes
+            pass
 
 
-# -------------------------------
-#       MODEL INITIALIZATION
-# -------------------------------
 @st.cache_resource(show_spinner=False)
 def load_embedder(model_name: str):
     """Load and cache the sentence transformer model for embeddings."""
@@ -106,9 +94,6 @@ cross_encoder = load_cross_encoder(CROSS_ENCODER_MODEL)
 EMBED_DIM = embedder.get_sentence_embedding_dimension()
 
 
-# -------------------------------
-#       GLOBAL FAISS INDEX
-# -------------------------------
 def initialize_session_resources():
     """Initialize or get FAISS resources from session state."""
     if "faiss_index" not in st.session_state:
@@ -118,8 +103,6 @@ def initialize_session_resources():
     return st.session_state.faiss_index, st.session_state.faiss_docs
 
 
-# We'll store chunk metadata in a Python list or dict.
-# The `faiss_ids[i]` will correspond to `faiss_docs[i]`.
 def get_faiss_resources():
     """
     Returns a tuple of (faiss_index, docstore),
@@ -131,9 +114,6 @@ def get_faiss_resources():
     return index, docstore
 
 
-# -------------------------------
-#    NEO4J DRIVER INITIALIZATION
-# -------------------------------
 @st.cache_resource(show_spinner=False)
 def init_neo4j_driver():
     """Initialize and return the Neo4j driver instance."""
@@ -152,9 +132,6 @@ def init_neo4j_driver():
         return None
 
 
-# -------------------------------
-#       FILE PARSING UTILS
-# -------------------------------
 def extract_text_from_pdf(pdf_file: BytesIO) -> str:
     """
     Extract text from a PDF file using pdfplumber.
@@ -202,12 +179,8 @@ def chunk_text(text: str, chunk_size: int = 300, overlap: int = 100):
     return chunks
 
 
-# -------------------------------
-#     DATA INGESTION: FAISS
-# -------------------------------
 def embed_chunks_batch(chunks: List[str], model_name: str) -> List[np.ndarray]:
     """Embed a batch of chunks using a local embedder instance."""
-    # Create a new embedder instance for this process
     local_embedder = SentenceTransformer(model_name)
     return [local_embedder.encode(chunk).astype(np.float32) for chunk in chunks]
 
@@ -230,30 +203,20 @@ def ingest_into_faiss(
     start_time = time.time()
     log_status(f"Ingesting content from: {source}")
 
-    # 1. Chunk the text
     text_chunks = chunk_text(content)
     total_chunks = len(text_chunks)
+
     log_status(f"Created {total_chunks} chunks for {source}")
 
-    # Calculate optimal number of processes and batch size
     num_cores = multiprocessing.cpu_count()
-    num_processes = min(num_cores - 1 or 1, 4)  # Reduced max processes to 4
-
-    # Adjust batch size based on total chunks
+    num_processes = min(num_cores - 1 or 1, 4)
     batch_size = min(batch_size, max(100, total_chunks // (num_processes * 2)))
-
-    # Split chunks into batches
     chunk_batches = [
         text_chunks[i : i + batch_size] for i in range(0, len(text_chunks), batch_size)
     ]
-
     all_vectors = []
     new_docstore_entries = []
-
-    # Create a partial function with the model name
     embed_fn = partial(embed_chunks_batch, model_name=HF_EMBED_MODEL)
-
-    # Add a progress counter
     processed_chunks_count = 0
     total_batches = len(chunk_batches)
 
@@ -277,19 +240,18 @@ def ingest_into_faiss(
 
                     processed_chunks_count += len(batch)
                     progress = f"[{processed_chunks_count}/{total_chunks}] "
-                    progress += f"Batch {i+1}/{total_batches} complete"
+                    progress += f"Batch {i + 1}/{total_batches} complete"
                     log_status(
-                        f"{progress} ({processed_chunks_count/total_chunks*100:.1f}%)"
+                        f"{progress} ({processed_chunks_count / total_chunks * 100:.1f}%)"
                     )
 
                 except Exception as e:
                     log_status(f"Error processing batch {i}: {str(e)}", level="error")
                     continue
 
-        # Add all vectors to FAISS
         if all_vectors:
             vectors_np = np.vstack(all_vectors)
-            vectors_np = normalize_vectors(vectors_np)  # Normalize before adding
+            vectors_np = normalize_vectors(vectors_np)
             faiss_index.add(vectors_np)
             docstore.extend(new_docstore_entries)
 
@@ -305,9 +267,6 @@ def ingest_into_faiss(
         raise
 
 
-# -------------------------------
-#     DATA INGESTION: Neo4j
-# -------------------------------
 def ingest_into_neo4j(driver, content: str, source: str):
     if not driver:
         log_status(
@@ -347,21 +306,13 @@ def ingest_into_neo4j(driver, content: str, source: str):
         raise
 
 
-# -------------------------------
-#     SEARCH & RETRIEVAL LOGIC
-# -------------------------------
 def vector_search_faiss(
     faiss_index: faiss.Index, docstore: list, query: str, top_k: int = 10
 ):
     """Perform cosine similarity search in FAISS using normalized vectors with inner product."""
-    # 1. Embed and normalize query
     query_emb = embedder.encode(query).astype(np.float32)
     query_emb = normalize_vectors(query_emb.reshape(1, -1))
-
-    # 2. Search in FAISS index (inner product of normalized vectors = cosine similarity)
     similarities, indexes = faiss_index.search(query_emb, top_k)
-
-    # 3. Gather results with scores (similarities are already cosine similarities)
     results = []
     if indexes.shape[1] > 0:
         for i, idx in enumerate(indexes[0]):
@@ -404,9 +355,6 @@ def neo4j_graph_search(driver, query: str, limit: int = 10):
         return []
 
 
-# -------------------------------
-#  CROSS-ENCODER RE-RANKING
-# -------------------------------
 def cross_encoder_rerank(
     query: str, candidates: list[tuple[str, str, float]], max_candidates: int = 10
 ):
@@ -417,23 +365,17 @@ def cross_encoder_rerank(
     if not candidates:
         return []
 
-    # Unpack the 3-value tuples for cross-encoder
     pair_inputs = [(query, content) for (content, source, _) in candidates]
     scores = cross_encoder.predict(pair_inputs)
 
-    # Combine all information
     combined = []
     for (content, source, _), score in zip(candidates, scores):
         combined.append((content, source, float(score)))
 
-    # Sort by cross-encoder score
     combined.sort(key=lambda x: x[2], reverse=True)
     return combined[:max_candidates]
 
 
-# -------------------------------
-#       RAG PIPELINE
-# -------------------------------
 def generate_answer(
     query: str, context: list[tuple[str, str, float]], conversation_history: str = ""
 ) -> str:
@@ -491,7 +433,7 @@ def rag_pipeline(
     user_query: str,
     conversation_history: str = "",
 ):
-    # 1. Vector retrieval via FAISS
+    # 1. Vector retrieval
     vector_results = vector_search_faiss(faiss_index, docstore, user_query, top_k=10)
 
     # 2. Graph retrieval
@@ -507,7 +449,6 @@ def rag_pipeline(
     # 4. Generate answer
     answer = generate_answer(user_query, reranked, conversation_history)
 
-    # Optional debug info
     if os.getenv("DEBUG", "false").lower() == "true":
         answer += "\n\n---\n### Debug Information\n"
         answer += f"**Query**: {user_query}\n\n"
@@ -521,9 +462,6 @@ def rag_pipeline(
     return answer
 
 
-# -------------------------------
-#       FAST PROCESSOR
-# -------------------------------
 @st.cache_resource(show_spinner=False)
 def get_document_processor():
     return FastDocumentProcessor(chunk_size=300, chunk_overlap=50)
@@ -555,11 +493,11 @@ def process_file_with_progress(
                 stats = processor.get_stats()
                 stats_md = f"""
                 **Processing Stats**:
-                - Time: {stats['total_time_seconds']:.1f}s
-                - Speed: {stats['processing_speed_chars_per_sec']:.0f} chars/sec
-                - Memory: {stats['peak_memory_mb']:.1f} MB
-                - Chunks: {stats['num_chunks']}
-                - Method: {stats['extraction_method']}
+                - Time: {stats["total_time_seconds"]:.1f}s
+                - Speed: {stats["processing_speed_chars_per_sec"]:.0f} chars/sec
+                - Memory: {stats["peak_memory_mb"]:.1f} MB
+                - Chunks: {stats["num_chunks"]}
+                - Method: {stats["extraction_method"]}
                 """
                 stats_container.markdown(stats_md)
 
@@ -569,13 +507,13 @@ def process_file_with_progress(
         final_stats = processor.get_stats()
         stats_md = f"""
         **Final Processing Stats**:
-        - Total Time: {final_stats['total_time_seconds']:.1f}s
-        - Extraction Time: {final_stats['extraction_time_seconds']:.1f}s
-        - Chunking Time: {final_stats['chunking_time_seconds']:.1f}s
-        - File Size: {final_stats['file_size_mb']:.1f} MB
-        - Total Chunks: {final_stats['num_chunks']}
-        - Avg Chunk Size: {final_stats['avg_chunk_size_chars']:.0f} chars
-        - Method: {final_stats['extraction_method']}
+        - Total Time: {final_stats["total_time_seconds"]:.1f}s
+        - Extraction Time: {final_stats["extraction_time_seconds"]:.1f}s
+        - Chunking Time: {final_stats["chunking_time_seconds"]:.1f}s
+        - File Size: {final_stats["file_size_mb"]:.1f} MB
+        - Total Chunks: {final_stats["num_chunks"]}
+        - Avg Chunk Size: {final_stats["avg_chunk_size_chars"]:.0f} chars
+        - Method: {final_stats["extraction_method"]}
         """
         stats_container.markdown(stats_md)
 
@@ -589,9 +527,6 @@ def process_file_with_progress(
         status_text.empty()
 
 
-# -------------------------------
-#        STREAMLIT APP
-# -------------------------------
 def check_session_timeout():
     """Clear session data if it's too old."""
     timeout_minutes = 60  # Adjust this value
@@ -609,8 +544,6 @@ def main():
         "This chatbot ingests PDF/CSV/PPTX files, performs a vector search with FAISS, "
         "an optional graph search with Neo4j, and then re-ranks results using a cross-encoder + GPT."
     )
-
-    # Add this before the sidebar file upload section
     batch_size = st.sidebar.number_input(
         "Batch Size",
         min_value=100,
@@ -620,8 +553,6 @@ def main():
         key="batch_size",
         help="Number of chunks to process in parallel. Higher values use more memory but may be faster.",
     )
-
-    # Initialize session resources instead of using cached resources
     faiss_index, faiss_docs = initialize_session_resources()
     driver = init_neo4j_driver()
     processor = get_document_processor()
@@ -631,7 +562,6 @@ def main():
     if "processed_files" not in st.session_state:
         st.session_state.processed_files = set()
 
-    # Sidebar for file uploads
     with st.sidebar:
         st.header("Upload Documents")
         uploaded_files = st.file_uploader(
@@ -640,7 +570,6 @@ def main():
             key="file_uploader",
         )
 
-        # Process files button
         if uploaded_files and st.button("Process Files", key="process_files"):
             for uploaded_file in uploaded_files:
                 filename = uploaded_file.name
@@ -683,7 +612,6 @@ def main():
             for file in st.session_state.processed_files:
                 st.write(f"✅ {file}")
 
-        # Add Clear Data button in sidebar
         if st.button("Clear All Data", type="secondary"):
             clear_session_data()
             st.rerun()
@@ -696,11 +624,9 @@ def main():
             elapsed = (time.time() - st.session_state.last_activity) / 60
             st.write(f"Session age: {elapsed:.1f} minutes")
 
-    # Chat interface
     st.write("---")
     st.subheader("Chat Interface")
 
-    # Display conversation history
     for msg in st.session_state.conversation:
         role = msg["role"]
         content = msg["content"]
@@ -708,7 +634,6 @@ def main():
         if role == "user":
             st.markdown(f"**You**: {content}")
         else:
-            # Create columns for better layout
             msg_col, source_col = st.columns([3, 1])
             with msg_col:
                 st.markdown(f"**Assistant**: {content}")
@@ -723,7 +648,6 @@ def main():
                         for s in sorted(sources):
                             st.markdown(f"- `{s}`")
 
-    # Query input
     user_query = st.text_input("Enter your question:", key="user_input")
 
     if st.button("Send", key="send_query"):
@@ -770,7 +694,6 @@ def main():
             )
 
 
-# Add this function for cleanup
 def clear_session_data():
     """Clear all vectors and documents from the current session."""
     if "faiss_index" in st.session_state:

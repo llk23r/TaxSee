@@ -1,4 +1,4 @@
-# Minimal RAG Chatbot with Hybrid Search
+# GraphRAG in 1000 lines
 
 This implementation demonstrates a cutting-edge approach to Retrieval-Augmented Generation (RAG) combining multiple SOTA techniques for maximum accuracy and performance.
 
@@ -67,3 +67,16 @@ This implementation demonstrates a cutting-edge approach to Retrieval-Augmented 
      * Process-based parallelism for CPU tasks
      * Thread-based for I/O operations
      * Dynamic batch sizing
+
+
+Instructions to run the repo:
+- `./setup_dev.sh`
+- `pip install -r requirements.txt`
+- `streamlit run app.py`
+
+
+Dataset:
+    - Test datasets in `evals/`:
+        - Hand-curated test cases
+        - Synthetic data generation
+        - Decent coverage
