@@ -1,0 +1,337 @@
+Completed Courses:
+- https://learn.deeplearning.ai/accomplishments/0b2a4d37-b70b-4958-a57b-1c5c381f2e16?usp=sharing
+- https://learn.deeplearning.ai/accomplishments/6fc5c6f4-98e7-4561-92f2-da65f3021933?usp=sharing
+- https://learn.deeplearning.ai/accomplishments/1227be08-c738-49cd-95a1-ca1717d128b6?usp=sharing
+
+
+- Notes:
+	- Information Retrieval (IR) and Retrieval Augmented Generation (RAG)
+		- Apparently it's a thing
+	- The RAG triad
+	- Grounding LLMs
+	- ICL: In-Context Learning
+	- GraphRAG is a thing
+	- Contextual Retrieval
+		- Supposedly better than regular RAG - By Anthropic
+			- https://github.com/anthropics/anthropic-cookbook/blob/main/skills/contextual-embeddings/guide.ipynb
+		- Mostly better because of contextual info that could be lost during chunking
+		- https://milvus.io/docs/contextual_retrieval_with_milvus.md
+			- Has code to measure accuracy with code: references to "evaluate_retrieval" etc
+			- Interesting to see how they take the accuracy from 81 ish to 90%
+			- Uses Cohere and reranker
+			- Also, mentions prompt caching
+			- Also has something called BM25
+				- BM25 is a probabilistic ranking function that improves upon TF-IDF. It scores documents based on query term frequency, while accounting for document length and term saturation. BM25 is widely used in modern search engines for its effectiveness in ranking relevant documents.
+				- Needs Elastic Search Installed
+	- For Evals
+		- Ragas itself has a lot of community post references that are very handy
+			- https://docs.ragas.io/en/stable/community/#blog-insights
+			-
+		- https://cleanlab.ai/blog/rag-tlm-hallucination-benchmarking/
+			- Cleanlab also has something called Trustworthy Language Model (TLM); mostly useful for evaluation of the response: could be handy
+				- https://tlm.cleanlab.ai/
+			- Ragas uses GPT-3.5 apparently and might not be enough
+			- Deepeval is also a thing:
+				- https://github.com/confident-ai/deepeval
+				- Compatible with Llamaindex
+				-
+		- https://medium.aiplanet.com/evaluate-rag-pipeline-using-ragas-fbdd8dd466c1
+			- Has some info on using Qdrant, Ragas and open source embeddings model
+		- https://medium.com/the-ai-forum/building-an-advanced-rag-pipeline-using-docling-groq-ollama-with-glider-evaluation-b91c290b0c84
+			- Very comprehensive
+			- Uses Docling (new stuff to read different kinds of docs including pdfs but has some limitation on metadata)
+			- Uses some evaluation mechanism called Glide
+			- Runs stuff on GPU
+		- https://superlinked.com/vectorhub/articles/retrieval-augmented-generation-eval-qdrant-ragas
+			- IN-DEPTH article on using Ragas and Qdrant
+				- Very E2E oriented
+		- https://superlinked.com/vectorhub/articles/improve-rag-with-raptor
+			- Using some new technique called RAPTOR
+			- Uses LanceDB
+				- https://github.com/parthsarthi03/raptor/tree/master
+		- https://github.com/superlinked/superlinked
+			- Superlinked itself is a framework for RAG
+			- Handles both structured and unstructured data
+			- https://superlinked.com/vectorhub/articles/rag-hr-chatbot
+	- High Quality Must Reference
+		- https://www.pinecone.io/learn/vectors-and-graphs-better-together/
+		- Uses Pinecone and Neo4j
+			- Has example for court cases
+			- Very similar to what we might want to do
+		-
+	- https://github.com/HKUDS/LightRAG
+		- LightRAG
+			- Supposedly better than Naive Rag + the Graph RAG even
+	- https://github.com/OpenSPG/KAG
+		- KAG
+			- This stores semantic relationships and is like a Graph RAG but is supposed to be better with reasoning
+			- Read some comments on youtube that it is too slow and that some of the UI is in Chinese; so might not work
+	- https://www.youtube.com/watch?v=Kvf-Pr1LRe4 - Super interesting approach to the e2e ingestion pipeline
+	- https://news.ycombinator.com/item?id=41034297
+		- "I can’t imagine any serious RAG application is not doing this - adding a contextual title, summary, keywords, and questions to the metadata of each chunk is a pretty low effort/high return implementation."
+	- https://simonwillison.net/search/?q=rag
+		- Some interesting write ups on RAG
+	- https://docs.llamaindex.ai/en/stable/examples/low_level/fusion_retriever/#step-3-perform-fusion
+		- Advanced Fusion Retriever from Scratch using LlamaIndex
+	- https://github.com/SciPhi-AI/R2R
+		- Containerized, state of the art Retrieval-Augmented Generation (RAG) with a RESTful API - updated daily
+		- Supports GraphRAG and Knowledge Graphs
+	- https://github.com/infiniflow/ragflow?tab=readme-ov-file
+		- Seems useful for parsing docs and tables: decent reviews on hackernews
+			- https://news.ycombinator.com/item?id=39896923
+	- https://github.com/Zipstack/unstract
+		- Intelligent Document Processing 2.0 (IDP 2.0) Platform Powered by Large Language Models
+	- https://github.com/getzep/graphiti
+		- Graphiti builds dynamic, temporally aware Knowledge Graphs that represent complex, evolving relationships between entities over time. Graphiti ingests both unstructured and structured data, and the resulting graph may be queried using a fusion of time, full-text, semantic, and graph algorithm approaches.
+		- No benchmarks so can't tell if it works well but seems interesting
+	- https://github.com/postgresml/korvus
+		- Supposedly all in one solution for RAG
+		- Does not look like it is in active development though
+		- But the idea is interesting
+			- Korvus is an all-in-one, open-source RAG (Retrieval-Augmented Generation) pipeline built for Postgres. It combines LLMs, vector memory, embedding generation, reranking, summarization and custom models into a single query, maximizing performance and simplifying your search architecture.
+	- https://github.com/chonkie-ai/chonkie
+		- Library for Chunking in RAG
+			- Makes me wonder what other libs exist
+		- Found from hackernews
+		- Seems to be in active development
+		- No real benchmarks but seems to be faster
+	- https://github.com/D-Star-AI/dsRAG/
+		- High-performance retrieval engine for unstructured data
+		- Supposedly the best results as per their benchmark
+		- Would be quite relevant if it works
+		- There are three key methods used to improve performance over vanilla RAG systems:
+			- Semantic sectioning
+			- AutoContext
+			- Relevant Segment Extraction (RSE)
+	- https://jina.ai/segmenter/
+		- API for chunking: Interesting (1 million tokens)
+		- Has rate limit for free one of 20
+		- https://jina.ai/news/text-embeddings-fail-to-capture-word-order-and-how-to-fix-it
+			- Interesting but idk what to do with it right now
+	- https://github.com/Cinnamon/kotaemon
+		- RAG UI for chatting with documents
+			- This project serves as a functional RAG UI for both end users who want to do QA on their documents and developers who want to build their own RAG pipeline.
+		- Seems to be in active development and also seems to be quite popular
+		- Supports GraphRAG and Docling
+		- Check issues:
+			- https://github.com/Cinnamon/kotaemon/issues/606
+			- username and password missing from docs: "admin"
+	- https://github.com/ray-project/llm-applications/blob/main/notebooks/rag.ipynb
+		- Very detailed write up about RAGs in production
+		- Has code and walkthrough
+		- Uses Anyscale for running code in, but can be run locally
+		- Likely useful to get started with
+	- https://blog.kuzudb.com/post/llms-graphs-part-2/
+		- Agents: Developing RAG Systems That Use Both Structured & Unstructured Data
+			- There are several tools you can use to develop RAG systems that retrieve data from both structured records or one that conditionally retrieves from one or the other. [LangChain Agents](https://python.langchain.com/docs/modules/agents/) and [LlamaIndex Agents](https://docs.llamaindex.ai/en/stable/use_cases/agents.html) make it easy to develop such pipelines. You can for example instruct the “Agent” to take one of two actions conditionally as follows: “if the question is about counting or aggregations retrieve records from the GDBMS by converting 𝑄𝑁𝐿*Q**N**L*​ to a Cypher query; otherwise follow the RAG-U pipeline to retrieve chunks from documents.” These are essentially tools to develop a control logic over your LLM applications. It reminds me of the good old days when there was a crazy hype around MapReduce-like “big data systems” and several initial works, such as [Pig Latin](https://dl.acm.org/doi/abs/10.1145/1376616.1376726) and [Ciel](https://www.usenix.org/legacy/event/nsdi11/tech/full_papers/Murray.pdf), immediately were addressing how to develop libraries/languages over these systems to implement advanced control flows. Agents, or the recent [LangGraph](https://github.com/langchain-ai/langgraph), seem like initial answers to the question of “how do you program advanced LLM applications?”
+				- This is interesting: It's essentially saying the way to handle both is using Agents directly.
+				- A common design point, which I will call the standard RAG-U, is to add chunks of documents as additional data and store them in a vector index. I found some of the most technically deep and interesting future work directions in this space, e.g., extending vectors to matrices.
+					- This is interesting as well.
+					- Extremely indepth and should be fully consumed
+					- Breaks down the problem for us completely
+			- Wonder if phi-data could be used or if I should try a vanilla langchain implementation directly
+			-
+	- https://github.com/neo4j/NaLLM
+		- exploring and demonstrating the synergies between Neo4j and Large Language Models (LLMs). As a part of our ongoing project, we are focusing on three primary use cases - a **Natural Language Interface to a Knowledge Graph**, **Creating a Knowledge Graph from Unstructured Data** and **Generate a Report using both static data and data from LLM**
+		- This is interesting: Clearly says how Neo4j could be used for structured and unstructured data
+		- Lots of blog posts mentioned inside it
+		- Not actively in development though
+	- https://jxnl.co/writing/2024/05/22/systematically-improving-your-rag/
+		- Inputs on improving RAG: mostly outlines low hanging fruits
+		- https://jxnl.co/writing/2024/01/07/inverted-thinking-rag/
+			- Outlines common mistakes in RAG
+		- https://jxnl.co/writing/2024/02/05/when-to-lgtm-at-k/#conclusion
+			- How to measure a RAG
+	- https://developers.cloudflare.com/workers-ai/tutorials/build-a-retrieval-augmented-generation-ai/
+		- Cloudflare seems to have a guide on how to do RAG on cloudflare; interesting.
+	- https://vectorize.io/how-to-build-a-rag-pipeline/
+		- Interesting read (reading)
+		- Keeping the index updated can be
+			- Realtime
+			- Cron
+		- Event driven system better otherwise batch can potentially cause self DDOS
+		- They built it on top of Apache Pulsar
+		- Talks about failure handling and dead letter queues as well
+	- https://www.voyageai.com/
+		- Paid but they do exactly this and raised $28M
+		- Supposedly their new model is much better than OAI and cohere's due to the way they process image and text for interleaved info
+			- https://blog.voyageai.com/2024/11/12/voyage-multimodal-3/
+		- https://colab.research.google.com/drive/12aFvstG8YFAWXyw-Bx5IXtaOqOzliGt9
+			- Interesting where they deal with different kinds of data including pdfs, screenshots etc
+			- At least the workflow/code could be handy
+			-
+	- https://github.com/illuin-tech/vidore-benchmark
+		- There's a benchmark for vision document retrieval: interesting
+		- https://huggingface.co/spaces/manu/ColPali-demo
+			- Apparently pdf can be dealt with vision model?
+				- ColPali: Efficient Document Retrieval with Vision Language Models
+					- https://arxiv.org/pdf/2407.01449
+					- Model and code is at: https://huggingface.co/vidore
+					- https://huggingface.co/Alibaba-NLP/gme-Qwen2-VL-7B-Instruct (likely the most relevant one for us)
+					- https://huggingface.co/nvidia/NV-Embed-v2
+	- https://news.ycombinator.com/item?id=41072632
+		- Thread on parsing pdf
+			- https://github.com/camelot-dev/camelot: For tables
+	- https://github.com/microsoft/markitdown
+		- Microsoft's solution to convert files and office documents to Markdown
+	- https://www.tamingllms.com/notebooks/input.html#preparing-the-knowledge-base
+		- Insanely value packed! Must follow!
+	- https://github.com/drmingler/docling-api
+		- Some wrapper around docling that can be run as a standalone. It converts stuff into markdown basically.
+	- https://github.com/opendatalab/MinerU/tree/master
+		- Seems super promising to extract data from pdfs and stuff
+	- https://github.com/opendatalab/PDF-Extract-Kit
+		- Similar, seems promising
+	- https://github.com/VikParuchuri/marker
+		- Seems to be promising as well - it's by the guy who created OCR (Surya)
+		- Converts pdf to markdown and json
+			- Different parts stored differently
+	- https://vectorize.io/rag-vector-database-traps/
+
+		- Some notes on things to think about:
+			- Chunking: Usually smaller, page-sized or paragraph-sized chunks would perform better
+				- Different techniques
+					- Semantic chunking
+						- Allows capturing longer passage of related texts
+						- Computationally expensive and slower - needs specific ML libraries for this
+					- Recursive chunking
+						- Create vector embedding from a given piece of text
+						- Then, provide context before and after the text to capture relevant context that surrounds each snippet
+			- Embeddings: Essentially, the search performed is the Nearest Neighbour Search
+				- Vectors are just arrays of floating point numbers
+				- Dot products and cosine similarities are used for search
+					- The actual distance/search is between the supplied query/term and the stored chunks
+				- Picking the wrong embedding model is problematic.
+					- Massive text embedding benchmark (MTEB) is the usual goto leaderboard
+					- it’s important to take a data driven approach to evaluate which embedding model performs best on metrics such as Context Relevancy and Normalized Discounted Cumulative Gain
+						- 1) what?
+						- Most of these leaderboards supposedly score well because of the type of data they are essentially trained in. Could be an overfit.
+						- CR
+							- There is often a trade off between chunk sizes and the CR score for data returned from a semantic search query. Larger chunks often contain irrelevant information, which can sometimes actually improve the accuracy of results since the LLM have a greater contextual understanding to incorporate into the generation process. At the same time, larger chunks can also cause LLMs to struggle when deciding which part of the chunk to pay attention to. For this reason, CR can be useful in determining whether your semantic search produces useful information, it is not always the case that higher scores equal higher accuracy
+						- NDCG
+							- NDCG is a metric that has long been used in search engines to determine if the search result data is useful and relevant for the query submitted by the user. Compared to CR, NDCG will tell you if the search result data returned is relevant and also how well the results are ranked. It is often used in information retrieval to measure the overall quality of search results.
+						- Ragas can help here likely
+			- Vectors:
+				- You need to know ahead of time how many dimensions each of your vectors will have
+					- How do we know though?
+				- Newer vector databases will use search indexes as their primary data types while more traditional relational and NoSQL databases will use tables or documents with vector-specific data points within these structures.
+				- The pipeline:
+					- Same problems as any data pipeline/system
+						- API calls to generate embeddings can fail, resulting in half populated vector index.
+						- Vector db can have outage, timeout or failures
+			- Metadata:
+				- Metadata filtering is essentially a pre-filtering step that is used to narrow down the set of vectors to search when you submit a vector search query.
+				- Important to design the metadata by anticipating partitioning keys that can narrow down search query as well as relevant details from knowledge base
+			- Hybrid search:
+				- Vector search + Full text search (keyword search)
+					- Opensearch/Elasticsearch: let you specify mixture of vector similarity search and keyword search
+			- Fresh data:
+				- Need strategy for keeping vector data fresh
+					- Does not specify how exactly though
+					-
+			- Evaluation pitfalls:
+				- Evaluating retrieval and generation in isolation can ignore the importance of context. So, test them on context and generalization. Try to use real-world use cases and queries
+				- Consider contextual relevance in both retrieval and generation evaluations
+				- Consider joint optimization of retrieval and generation models. Include user-centric metrics in the evaluation process
+				- Set up performance benchmarks for latency and resource usage. Include these in the evaluation criteria alongside accuracy and relevance metrics
+				- Stakeholder feedback and iterative feedback are key here
+			- Major things to think about:
+		
+				- Clean data: You need an accurate transformation of your data into vector search indexes
+					- You should use NLP techniques and machine learning algorithms that will interpret and transform the unstructured data that you feed it.
+				- Data Normalization: Transform the data into a standard format
+				- Training your own model: How?
+				- Modularity:
+					- By compartmentalizing different functions, such as
+					- data ingestion
+						- integration of real-time data processing capabilities is useful
+						- leveraging technologies such as stream processing and in-memory databases, AI applications can respond to changing data dynamics with agility and precision
+					- cleansing
+						- The data quality in RAG pipelines must be excellent. Making no room for error will be your number one goal here.
+						- this process includes checking missing values, validating data formats, and making sure there is consistency across various sources
+						- Utilizing automated data quality assurance tools can streamline the process of identifying and addressing data quality issues in the RAG pipeline
+						- One strategy for optimizing data transformation is to leverage advanced machine learning techniques, such as deep learning algorithms, to extract meaningful features from the data. These techniques can help capture complex patterns and relationships within the data, improving the quality of the vector representations generated
+						- In the RAG pipeline, feature engineering should be one of the main focuses. That’s where it can extract and transform raw data from specific data sets.
+					- vectorization
+				- In-Memory Databases for Instant Data Access
+					- By storing data in memory rather than on disk, these databases enable rapid access to information, supporting low-latency operations within RAG pipelines
+				- Privacy and security
+					- One way to do this is by finding a data encryption method that will be the best fit along with implementing access controls and making sure data protection regulations are followed accordingly
+				- Testing  and validation
+					- Everything from the pipeline to the entire system performance must all be tested and validated
+			- Agents:
+				- It’s a good idea to provide an exit function so the reasoning layer can indicate when it has completed processing and the action layer should exit successfully
+				- **Tool Layer**: The foundation of the system. This layer interfaces with external data sources and services, including APIs, vector databases, operational data, knowledge bases, and user interactions. It’s responsible for fetching the raw information the system relies on. Well-designed tools ensure the agent retrieves relevant, high-quality data efficiently.
+				- **Action Layer**: Sometimes called the orchestration layer. This is layer is responsible for brokering the interactions between the LLM and the outside world (the tools). It handles interactions with the user, when applicable. It receives instructions from the LLM about which action to take next, performs that action, then provides the result to the LLM in the reasoning layer.
+				- **Reasoning Layer**: The core of the system’s intelligence. This layer processes the retrieved information using a large language model (LLM)*. It determines what the agent needs to do next, leveraging context, logic, and predefined goals. Poor reasoning leads to errors like redundant queries or misaligned actions.
+				-
+				-
+				-
+					-
+				-
+		-
+		-
+		-
+		-
+		-
+		-
+		-
+	- https://github.com/sambanova/ai-starter-kit/tree/main
+		- Lots of workflows and examples to borrow from to actually build stuff
+	- https://arxiv.org/pdf/2303.09957
+		- Survey paper of different pdf extractors
+	- https://github.com/weaviate/recipes/blob/main/weaviate-features/bring-your-own-vectors-and-multi-lingual/modernBERT_embeddings/vector_search_modernbert.ipynb
+		- ModernBert with Weaviate
+	- https://github.com/Arize-ai/phoenix
+		- Phoenix is an open-source AI observability platform designed for experimentation, evaluation, and troubleshooting. It provides:
+			- [***Tracing***](https://docs.arize.com/phoenix/tracing/llm-traces) - Trace your LLM application's runtime using OpenTelemetry-based instrumentation.
+			- [***Evaluation***](https://docs.arize.com/phoenix/evaluation/llm-evals) - Leverage LLMs to benchmark your application's performance using response and retrieval evals.
+			- [***Datasets***](https://docs.arize.com/phoenix/datasets-and-experiments/overview-datasets) - Create versioned datasets of examples for experimentation, evaluation, and fine-tuning.
+			- [***Experiments***](https://docs.arize.com/phoenix/datasets-and-experiments/overview-datasets#experiments) - Track and evaluate changes to prompts, LLMs, and retrieval.
+	- https://github.com/Dan-wanna-M/formatron
+		- Formatron allows users to control the output format of language models with minimal overhead. It is lightweight, user-friendly, and seamlessly integrates into existing codebases and frameworks.
+			- Allows Pydantic and post generation function calls as well
+	- https://github.com/Shubhamsaboo/awesome-llm-apps/blob/main/rag_tutorials/rag-as-a-service/rag_app.py
+		- Gives some idea of what the overall interface should look like
+		- https://github.com/ragieai/rag-demo
+			- Barebones rag demo
+			- https://github.com/ragieai/cookbook-notebooks/blob/main/ragie-cookbook-notebooks/dynamic-filter-notebook.ipynb
+				- Has references to proprietary site but gives a rough idea of what a metadata filtering generation likely looks like; especially w.r.t dates
+		- https://github.com/Shubhamsaboo/awesome-llm-apps/blob/main/rag_tutorials/hybrid_search_rag/main.py
+			- Hybrid search rag ~ 170 lines of code ~
+		- https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/rag_tutorials
+			- Lots of one-file samples here to refer to
+	- https://github.com/Shubhamsaboo/awesome-llm-apps/blob/main/llm_apps_with_memory_tutorials/ai_arxiv_agent_memory/ai_arxiv_agent_memory.py
+		- https://github.com/mem0ai/mem0
+		- Mem0 - memory layer ~ not quite sure where exactly it fits in but allows generating graph memory for user interactions, so it can generate better responses for user queries during the conversation ~
+	- https://github.com/lunary-ai/lunary
+		- Developer toolkit for LLM chatbots
+		- The production toolkit for LLMs. Observability, prompt management and evaluations.
+	- https://ai.gopubby.com/rag-evaluation-a-visual-approach-c9af26006ef5
+	- https://medium.com/@vijaybudhewar4/advanced-rag-technique-know-your-rag-application-better-9f881e55cdaa
+		- Pretty neat demonstration of visualization and importance of sequence
+	- https://github.com/Renumics/spotlight
+		- Tool to visualize unstructured datasets
+	- https://github.com/neuml/txtai
+		- All-in-one open-source embeddings database for semantic search, LLM orchestration and language model workflow
+	- https://raghunaathan.medium.com/query-translation-for-rag-retrieval-augmented-generation-applications-46d74bff8f07
+		- Pretty detailed with code: could be useful
+	- https://blog.gopenai.com/indexing-and-routing-strategies-in-retrieval-augmented-generation-rag-chatbots-06271908e9f6
+		- Blog by the same guy: pretty detailed with code
+	- https://archive.data.jhu.edu/dataset.xhtml?persistentId=doi:10.7281/T1/N1X6I4
+		- Tax law NLP Resource
+		- LegalBert: https://huggingface.co/jhu-clsp/LegalBert
+	- https://github.com/hsarfraz/document-ai/tree/main/RT-DETR%20-%20IRS%20Form%201040%202023%20table%20extraction
+		- https://www.taxdataexchange.org/docs/fdx/v5.0/index.html
+		- IRS 1040 table extraction
+		- https://www.irs.gov/instructions/i1040gi
+		- Makes me wonder if the form can actually be filled with data as well.
+		- https://gist.github.com/nbren12/8983c0257455ec1381b27417e0c553fe
+			- From 2020 but gives an idea for actual calculation
+		- Test cases?
+			- https://gist.github.com/koderpanda/5cf46b4ffa6c762267888d0f371d0564
+	- https://gist.github.com/ruvnet/24c0514830c0b9663f652ee67bb20f7c
+		-
+	- https://ceur-ws.org/Vol-2645/paper5.pdf
+		- A Dataset for Statutory Reasoning in Tax Law Entailment and
+		  Question Answering  

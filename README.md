@@ -1,4 +1,4 @@
-# GraphRAG in 1000 lines
+# GraphRAG in 1000 lines (AND A RAG ENGINE to build future RAG applications ~ WIP)
 
 This implementation demonstrates a cutting-edge approach to Retrieval-Augmented Generation (RAG) combining multiple SOTA techniques for maximum accuracy and performance.
 
@@ -80,3 +80,48 @@ Dataset:
         - Hand-curated test cases
         - Synthetic data generation
         - Decent coverage
+
+
+# Raw RAG Thoughts and Notes
+
+## What is this?
+A lightweight implementation of Retrieval Augmented Generation (RAG) that focuses on simplicity and practicality. Built after experimenting with various approaches and learning what actually works.
+
+## Architecture
+### Key Components:
+- **FAISS**: Chosen over Milvus after real-world testing with large files
+- **Neo4j**: For graph relationships (optional component) 
+- **Cross-Encoder**: For better result ranking
+
+## Engineering Decisions & Learnings
+
+### 🔄 From Milvus to FAISS
+Started with Milvus + Attu (looked promising!) but switched to FAISS when Milvus struggled with a 7000-page PDF. FAISS is simpler, lighter, and just works.
+
+### 📄 The PDF Challenge
+PDF parsing is surprisingly hard! Tested multiple libraries, ended up with a practical compromise using pdfplumber for decent speed/accuracy balance.
+
+### 💡 Interesting Discoveries
+- PPTx files are actually zip files (mind = blown)
+- Experimented with Ollama + Llama 3.2 vision for metadata extraction
+- Tried Gemini 1.5 Pro for chunk reorganization (interesting but slow)
+
+## RAG ENGINE
+
+### The Gemini Experiment
+An experimental approach for high accuracy:
+1. Load batch of chunks into memory
+2. Send to Gemini 1.5 Pro
+3. Ask Gemini to reorganize for coherence
+4. Generate Cypher queries for precise graph relationships
+
+## Current Limitations
+- Large files are still challenging (working on it!)
+- Requires OpenAI API key (local LLM support planned)
+- Could use better CSV handling (SQL approach in progress)
+
+## Future Ideas
+### CSV Processing Enhancement
+
+
+
