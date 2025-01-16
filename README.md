@@ -77,10 +77,16 @@ Resources:
 
 
 Instructions to run the repo:
-- `./setup_dev.sh`
+- `Run Docker desktop`
+- `./setup_dev.sh --with-docker`
 - `pip install -r requirements.txt`
+    - `source .venv/bin/activate`
+    - `uv sync`
+    - `uv run spacy download en_core_web_sm` 
 - `streamlit run app.py`
-
+- `Access Neo4j browser at http://localhost:7474` (username: neo4j, password: taxrag_dev_password)
+- `Access Streamlit app at http://localhost:8501`
+- Ensure .env is set correctly; especially with OPENAI_API_KEY; .env.example is provided.
 
 Dataset:
     - Test datasets in `evals/`:

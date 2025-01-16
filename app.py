@@ -103,16 +103,6 @@ def initialize_session_resources():
     return st.session_state.faiss_index, st.session_state.faiss_docs
 
 
-def get_faiss_resources():
-    """
-    Returns a tuple of (faiss_index, docstore),
-    where docstore is a list of metadata dicts:
-    [{'content': str, 'source': str}, ...]
-    """
-    index = create_faiss_index()
-    docstore = []
-    return index, docstore
-
 
 @st.cache_resource(show_spinner=False)
 def init_neo4j_driver():
@@ -130,41 +120,6 @@ def init_neo4j_driver():
     except Exception as e:
         log_status(f"Failed to connect to Neo4j: {str(e)}", level="error")
         return None
-
-
-def extract_text_from_pdf(pdf_file: BytesIO) -> str:
-    """
-    Extract text from a PDF file using pdfplumber.
-    """
-    text = []
-    with pdfplumber.open(pdf_file) as pdf:
-        for page in pdf.pages:
-            page_text = page.extract_text() or ""
-            text.append(page_text)
-    return "\n".join(text)
-
-
-def extract_text_from_csv(csv_file: BytesIO) -> str:
-    """
-    Extract text from a CSV file (e.g., logs of transactions).
-    """
-    csv_data = csv_file.read().decode("utf-8", errors="ignore")
-    df = pd.read_csv(StringIO(csv_data))
-    return df.to_csv(index=False)
-
-
-def extract_text_from_pptx(pptx_file: BytesIO) -> str:
-    """
-    Extract text from a PPTX file using python-pptx.
-    """
-    prs = Presentation(pptx_file)
-    text_runs = []
-    for slide in prs.slides:
-        for shape in slide.shapes:
-            if hasattr(shape, "text"):
-                text_runs.append(shape.text)
-    return "\n".join(text_runs)
-
 
 def chunk_text(text: str, chunk_size: int = 300, overlap: int = 100):
     words = text.split()
